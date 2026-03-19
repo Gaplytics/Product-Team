@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product Ideas — Team Discussion Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4ef;
+    --surface: #ffffff;
+    --surface2: #f0efe9;
+    --border: rgba(0,0,0,0.10);
+    --border2: rgba(0,0,0,0.18);
+    --text: #111110;
+    --text2: #3a3935;
+    --text3: #6b6a65;
+    --accent: #1a1a18;
+    --accent2: #c0392b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+
+  /* Grain overlay */
+  body::before {
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity: 0.2;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+  /* Header */
+  header { padding: 52px 0 40px; border-bottom: 1px solid var(--border); }
+  .header-inner { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+  .logo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .logo-dot { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; animation: pulse 2.5s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.6;transform:scale(0.85)} }
+  .logo-label { font-size: 11px; font-weight: 500; letter-spacing: 0.12em; color: var(--text2); text-transform: uppercase; }
+  h1 { font-family: 'DM Serif Display', serif; font-size: clamp(32px, 5vw, 52px); line-height: 1.1; color: var(--text); }
+  h1 em { color: var(--accent); font-style: italic; }
+  .header-meta { font-size: 13px; color: var(--text3); line-height: 1.6; max-width: 280px; text-align: right; }
+
+  /* Filters */
+  .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; padding: 24px 0; border-bottom: 1px solid var(--border); }
+  .filter-btn { font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; }
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: var(--accent); color: #ffffff; border-color: var(--accent); }
+
+  /* Stats strip */
+  .stats-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); margin: 24px 0; border-radius: 12px; overflow: hidden; }
+  .stat { background: var(--surface); padding: 20px; }
+  .stat-val { font-family: 'DM Serif Display', serif; font-size: 28px; color: var(--accent); }
+  .stat-lbl { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+  /* Grid */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; padding: 24px 0; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    position: relative;
+  }
+  .card:hover { transform: translateY(-3px); border-color: var(--border2); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+  .card.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), 0 12px 40px rgba(232,255,107,0.08); }
+  .card-top { padding: 22px 22px 16px; border-bottom: 1px solid var(--border); }
+  .card-icon-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .card-icon { font-size: 28px; }
+  .card-rank { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--text3); }
+  .card-title { font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .card-tagline { font-size: 13px; color: var(--text2); line-height: 1.45; }
+  .card-body { padding: 16px 22px 20px; }
+  .meter-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .meter-lbl { font-size: 11px; color: var(--text3); width: 56px; flex-shrink: 0; }
+  .meter { flex: 1; height: 4px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+  .meter-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+  .meter-val { font-size: 11px; color: var(--text3); width: 28px; text-align: right; }
+  .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 14px; }
+  .tag { font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 12px; background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+  .card-footer { display: flex; align-items: center; justify-content: space-between; padding: 12px 22px; border-top: 1px solid var(--border); background: var(--surface2); }
+  .footer-mrr { font-size: 15px; font-weight: 600; color: var(--accent); }
+  .footer-time { font-size: 11px; color: var(--text3); }
+
+  /* Drawer */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(4px); }
+  .drawer-overlay.open { opacity: 1; pointer-events: all; }
+  .drawer { position: fixed; right: 0; top: 0; bottom: 0; width: min(580px, 100vw); background: #ffffff; border-left: 1px solid var(--border2); z-index: 101; transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.32,0,0.18,1); overflow-y: auto; }
+  .drawer.open { transform: translateX(0); }
+  .drawer-inner { padding: 32px 28px 60px; }
+  .drawer-close { position: absolute; top: 20px; right: 20px; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border2); background: var(--surface2); color: var(--text2); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; font-family: monospace; }
+  .drawer-close:hover { background: var(--border2); color: var(--text); }
+  .drawer-icon { font-size: 40px; margin-bottom: 12px; }
+  .drawer-title { font-family: 'DM Serif Display', serif; font-size: 28px; line-height: 1.2; margin-bottom: 6px; }
+  .drawer-sub { font-size: 14px; color: var(--text2); margin-bottom: 20px; line-height: 1.5; }
+  .badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
+  .badge { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px; }
+  .badge-r { background: #fdecea; color: #b91c1c; border: 1px solid #f5c6c6; }
+  .badge-g { background: #edfaf3; color: #166534; border: 1px solid #bbf0d1; }
+  .badge-b { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .badge-y { background: #fefce8; color: #854d0e; border: 1px solid #fde68a; }
+
+  .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+  .metric { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+  .metric-val { font-size: 18px; font-weight: 600; color: var(--text); }
+  .metric-lbl { font-size: 11px; color: var(--text3); margin-top: 3px; }
+
+  .section { margin-bottom: 20px; }
+  .section-title { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+  .section-body { font-size: 13px; color: var(--text2); line-height: 1.65; }
+
+  .quote-block { border-left: 2px solid #111110; padding: 10px 14px; margin-bottom: 20px; background: #f5f4ef; border-radius: 0 8px 8px 0; }
+  .quote-text { font-size: 13px; font-style: italic; color: #111110; line-height: 1.55; margin-bottom: 4px; }
+  .quote-src { font-size: 11px; color: var(--text3); }
+
+  .comp-list { list-style: none; }
+  .comp-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .comp-item:last-child { border-bottom: none; }
+  .comp-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+  .comp-gap { font-size: 12px; color: var(--text2); line-height: 1.4; }
+  .comp-threat { flex-shrink: 0; text-align: center; }
+  .threat-val { font-size: 16px; font-weight: 600; }
+  .threat-lbl { font-size: 9px; color: var(--text3); }
+
+  .mvp-list { list-style: none; counter-reset: mvp; }
+  .mvp-item { display: flex; gap: 12px; margin-bottom: 10px; }
+  .mvp-num { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--text3); flex-shrink: 0; margin-top: 1px; }
+  .mvp-text { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+  .stack-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .stack-tag { font-size: 11px; font-weight: 500; padding: 5px 10px; border-radius: 8px; background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); font-family: 'DM Sans', monospace; }
+
+  .moat-box { background: #f0f9f4; border: 1px solid #a7d9bc; border-radius: 10px; padding: 14px; }
+  .moat-text { font-size: 13px; color: #14532d; line-height: 1.55; }
+
+  .cta-btn { display: block; width: 100%; margin-top: 24px; padding: 14px; border-radius: 10px; background: #111110; color: #ffffff; font-size: 14px; font-weight: 600; border: none; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; text-align: center; }
+  .cta-btn:hover { background: #2a2a28; transform: scale(1.01); }
+
+  /* Discussion notes area */
+  .notes-area { margin-top: 16px; }
+  .notes-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 8px; }
+  .notes-input { width: 100%; background: #ffffff; border: 1px solid var(--border2); border-radius: 10px; padding: 12px; color: #111110; font-family: 'DM Sans', sans-serif; font-size: 13px; resize: vertical; min-height: 90px; outline: none; transition: border-color 0.15s; }
+  .notes-input:focus { border-color: #111110; }
+  .notes-input::placeholder { color: var(--text3); }
+  .save-note-btn { margin-top: 8px; font-size: 12px; font-weight: 500; padding: 6px 14px; border-radius: 8px; border: 1px solid var(--border2); background: transparent; color: var(--text2); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+  .save-note-btn:hover { background: var(--surface2); color: var(--text); }
+
+  /* Vote buttons */
+  .vote-row { display: flex; gap: 8px; margin-top: 16px; }
+  .vote-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid var(--border2); background: var(--surface2); color: var(--text2); font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .vote-btn:hover { border-color: var(--border2); color: var(--text); }
+  .vote-btn.vote-yes { border-color: #166534; color: #166534; background: #edfaf3; }
+  .vote-btn.vote-no { border-color: #b91c1c; color: #b91c1c; background: #fdecea; }
+  .vote-btn.vote-maybe { border-color: #854d0e; color: #854d0e; background: #fefce8; }
+
+  /* Comparison table */
+  .compare-section { padding: 32px 0; border-top: 1px solid var(--border); }
+  .compare-title { font-family: 'DM Serif Display', serif; font-size: 24px; margin-bottom: 20px; }
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .compare-table th { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--border2); font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); }
+  .compare-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text2); vertical-align: top; }
+  .compare-table tr:hover td { background: var(--surface2); }
+  .compare-table td:first-child { font-weight: 500; color: var(--text); }
+  .score-bar { display: flex; align-items: center; gap: 8px; }
+  .score-fill { height: 4px; border-radius: 4px; }
+
+  /* Footer */
+  footer { border-top: 1px solid var(--border); padding: 28px 0; text-align: center; }
+  .footer-text { font-size: 12px; color: var(--text3); }
+
+  @media (max-width: 600px) {
+    .stats-strip { grid-template-columns: repeat(2, 1fr); }
+    .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+    .header-meta { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="header-inner">
+      <div>
+        <div class="logo-row">
+          <div class="logo-dot"></div>
+          <span class="logo-label">Product Exploration — 2026</span>
+        </div>
+        <h1>8 Ideas Worth<br><em>Building</em></h1>
+      </div>
+      <div class="header-meta">
+        Discovered from Reddit, Quora & LinkedIn pain signals.<br>
+        Click any card to explore, vote, and add notes.
+      </div>
+    </div>
+  </header>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filterCards('all', this)">All 8</button>
+    <button class="filter-btn" onclick="filterCards('fast', this)">Fast to ship (&lt;5 wks)</button>
+    <button class="filter-btn" onclick="filterCards('highrev', this)">High revenue signal</button>
+    <button class="filter-btn" onclick="filterCards('nocmp', this)">No direct competitors</button>
+    <button class="filter-btn" onclick="filterCards('b2b', this)">B2B / Team tools</button>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <div class="stats-strip">
+    <div class="stat"><div class="stat-val">8</div><div class="stat-lbl">Product ideas</div></div>
+    <div class="stat"><div class="stat-val">$3–18K</div><div class="stat-lbl">MRR potential range</div></div>
+    <div class="stat"><div class="stat-val">3–9 wk</div><div class="stat-lbl">MVP timelines</div></div>
+    <div class="stat"><div class="stat-val">0–1</div><div class="stat-lbl">Direct competitors (most)</div></div>
+  </div>
+
+  <div class="compare-section">
+    <div class="compare-title">Side-by-side comparison</div>
+    <div style="overflow-x:auto;">
+      <table class="compare-table" id="compare-table"></table>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-text">Use the discussion notes on each idea to capture your team's feedback · Click "Start building" on any idea to generate a build plan</div>
+  </footer>
+</div>
+
+<!-- Drawer -->
+<div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  <div class="drawer-inner" id="drawer-content"></div>
+</div>
+
+<script>
+const ideas = [
+  {
+    icon:"💸", name:"Auto-Invoice Chaser", tagline:"Automated payment follow-ups for freelancers",
+    accent:"#E24B4A", pain:95, revenue:88, effort:32, mrr:"$4–8K", time:"3–4 weeks", pricing:"$19–49/mo",
+    market:"59M freelancers in US alone", fast:true, highrev:false, nocmp:false, b2b:false,
+    quote:"I lose 4+ hours every week just following up on late invoices. It's humiliating and exhausting.",
+    source:"r/freelance",
+    problem:"Freelancers globally lose thousands per year in late or ghost payments. Following up feels awkward, gets skipped, and unpaid invoices pile up. Most invoicing tools send one reminder — that's it.",
+    solution:"A smart follow-up engine that auto-sends escalating, tone-aware reminder emails (polite → firm → final notice) on a schedule you set. Integrates with Stripe, PayPal, and FreshBooks. Tracks opens, replies, and payment status.",
+    competitors:[
+      {name:"FreshBooks", gap:"Generic reminders, no escalation logic", threat:60},
+      {name:"HoneyBook", gap:"Full CRM, overkill for solo freelancers", threat:45},
+      {name:"Wave", gap:"Free but zero automation", threat:30}
+    ],
+    mvp:["Email integration (Gmail/Outlook OAuth)","3-step reminder sequence with editable templates","Stripe/PayPal webhook to auto-stop reminders on payment","Dashboard showing overdue invoice aging"],
+    stack:["Stripe","Gmail API","Node.js","Supabase"],
+    moat:"AI-generated tone matching (firm but not rude). Over time: late payer risk scores based on history.",
+    badges:[{t:"Highest willingness to pay",c:"badge-r"},{t:"Fastest MVP",c:"badge-g"}]
+  },
+  {
+    icon:"📄", name:"Proposal Wizard", tagline:"Branded PDF proposals with embedded Stripe payment",
+    accent:"#7F77DD", pain:88, revenue:85, effort:42, mrr:"$6–12K", time:"4–6 weeks", pricing:"$29–79/mo",
+    market:"Freelance market projected at $455B by 2026", fast:true, highrev:false, nocmp:false, b2b:false,
+    quote:"I spend 2–3 hours per proposal. Half the time the client ghosts. I need a system.",
+    source:"r/freelance + r/entrepreneur",
+    problem:"Every proposal is built from scratch in Google Docs or Canva. No link to contracts, no payment collection, and no way to track if the client even opened it.",
+    solution:"4-question wizard → generates a beautiful branded proposal PDF with scope, timeline, pricing table, and an embedded Stripe payment link for the deposit. Client signs + pays in one click.",
+    competitors:[
+      {name:"Bonsai", gap:"Heavy full platform, overwhelming for new freelancers", threat:65},
+      {name:"Proposify", gap:"Built for agencies, not solo freelancers", threat:55},
+      {name:"Canva", gap:"Design only, no payment or e-sign", threat:25}
+    ],
+    mvp:["5-question onboarding wizard","PDF generation via Puppeteer or Docraptor","Stripe link embedded in proposal footer","Email open tracking pixel"],
+    stack:["Stripe","PDF API","React","OpenAI"],
+    moat:"Industry-specific templates (designers, copywriters, devs). AI-written scope sections from bullet points.",
+    badges:[{t:"Strong upsell potential",c:"badge-b"},{t:"Clear differentiation",c:"badge-g"}]
+  },
+  {
+    icon:"🔗", name:"Affiliate Link Tracker", tagline:"Creator-side broken link monitor & click analytics",
+    accent:"#1D9E75", pain:84, revenue:80, effort:38, mrr:"$3–7K", time:"3–5 weeks", pricing:"$15–39/mo",
+    market:"Global affiliate marketing spend hitting $15.7B in 2025", fast:true, highrev:false, nocmp:true, b2b:false,
+    quote:"I've lost hundreds in commissions from broken affiliate links that I didn't even know had expired.",
+    source:"r/YoutubeCreators + r/blogging",
+    problem:"Creators scatter affiliate links across YouTube descriptions, blog posts, and social bios. Links rot, programs expire, and commissions silently disappear. No tool monitors this from the creator's side.",
+    solution:"Paste your content URLs. The tool crawls and extracts all affiliate links, monitors them daily for 404s or redirect breakage, and alerts you via email/Slack. Dashboard shows click trends per link.",
+    competitors:[
+      {name:"Impact / CJ Affiliate", gap:"Brand-side tools, not creator-side monitoring", threat:20},
+      {name:"Dub.co", gap:"Link management, not broken-link alerting", threat:40},
+      {name:"Geniuslink", gap:"Link routing, no health monitoring", threat:35}
+    ],
+    mvp:["URL crawler extracting all outbound affiliate links","Daily health check with 404/redirect detection","Email digest of broken links","Simple click counter via redirect proxy"],
+    stack:["Node.js crawler","Puppeteer","Cron jobs","Resend"],
+    moat:"First creator-side affiliate health monitor. Add WordPress plugin and Chrome extension.",
+    badges:[{t:"Underserved niche",c:"badge-y"},{t:"Fastest to validate",c:"badge-g"}]
+  },
+  {
+    icon:"📅", name:"Sponsorship CRM", tagline:"Lightweight deal tracker for micro-influencers",
+    accent:"#BA7517", pain:80, revenue:78, effort:50, mrr:"$5–10K", time:"5–7 weeks", pricing:"$19–59/mo",
+    market:"50M+ content creators globally; creator economy valued at $250B", fast:false, highrev:false, nocmp:true, b2b:false,
+    quote:"I'm juggling 6 brand deals in a Google Sheet and I keep missing deadlines. There is nothing built for creators.",
+    source:"r/YouTubeCreators + r/influencermarketing",
+    problem:"Brand deals involve negotiation, deliverable deadlines, content approvals, and invoicing — all managed in Gmail and spreadsheets. Creators miss deadlines and leave money on the table.",
+    solution:"A Kanban-style CRM where each brand deal moves through stages: Pitched → Negotiating → Contracted → Deliverable Due → Invoiced → Paid. Auto-reminders for deadlines. Rate history per brand.",
+    competitors:[
+      {name:"Modash", gap:"Brand-side discovery tool, not creator-side deal management", threat:15},
+      {name:"Notion templates", gap:"DIY, no automation or reminders", threat:30},
+      {name:"HubSpot", gap:"Way too complex and expensive for a creator", threat:10}
+    ],
+    mvp:["Kanban board with deal stages","Deadline reminders via email","Rate/deliverable fields per deal","Simple invoice generator linked to each deal"],
+    stack:["React Kanban","Supabase","Resend","Stripe"],
+    moat:"Built by a creator, for creators. Brand reputation tracking — rate your experience with each brand.",
+    badges:[{t:"Zero direct competition",c:"badge-r"},{t:"High LTV users",c:"badge-b"}]
+  },
+  {
+    icon:"📦", name:"Shopify Shipping Simulator", tagline:"Catch mis-priced shipping rules before they cost you",
+    accent:"#378ADD", pain:83, revenue:82, effort:55, mrr:"$4–9K", time:"5–8 weeks", pricing:"$29–69/mo",
+    market:"4.6M Shopify merchants worldwide", fast:false, highrev:false, nocmp:true, b2b:false,
+    quote:"I accidentally shipped 200 orders under-priced because my weight rules conflicted. Lost $1,400 in one week.",
+    source:"r/shopify",
+    problem:"Shopify's shipping rules are notoriously hard to test. Merchants set up complex weight/zone/product-tag rules and don't discover conflicts until customers pay wrong amounts.",
+    solution:"A simulator where you input a cart (items, weight, destination) and it shows exactly which shipping rates would fire — and flags conflicts. Like a 'dry run' for your shipping config.",
+    competitors:[
+      {name:"ShipZip / Calcurates", gap:"These set rules — they don't simulate or audit them", threat:40},
+      {name:"Shopify native", gap:"No testing or preview mode at all", threat:0},
+      {name:"ShipStation", gap:"Fulfillment tool, not a pre-launch tester", threat:20}
+    ],
+    mvp:["Shopify OAuth app install","Pull shipping rules via API","Simulate cart scenarios (weight, destination)","Flag conflicting rules with plain-English explanation"],
+    stack:["Shopify API","Node.js","React","Shopify App Store"],
+    moat:"Weekly automated shipping health check report. First Shopify app focused on shipping rule QA.",
+    badges:[{t:"Shopify App Store distribution",c:"badge-b"},{t:"Clear ROI story",c:"badge-g"}]
+  },
+  {
+    icon:"📊", name:"SaaS Spend Auditor", tagline:"Show teams what software they pay for but don't use",
+    accent:"#534AB7", pain:77, revenue:90, effort:58, mrr:"$8–18K", time:"6–9 weeks", pricing:"$49–149/mo",
+    market:"Average SMB wastes 30% of SaaS spend; $78B wasted globally per year", fast:false, highrev:true, nocmp:false, b2b:true,
+    quote:"We had 14 people paying for Notion, 6 of whom hadn't logged in for 3 months. Nobody had visibility.",
+    source:"r/startups + r/SaaS",
+    problem:"Companies accumulate subscriptions via credit cards from multiple people. By the time you audit, you're paying for tools nobody uses. No one has visibility into the full stack's cost vs. usage.",
+    solution:"Connect your company's bank/card feeds or import from Google Workspace/Slack. Identifies SaaS charges, maps them to tools, shows per-seat cost, last login data, and flags low-usage waste.",
+    competitors:[
+      {name:"Blissfully / Zylo", gap:"Enterprise-only, $20K+/year, requires IT buy-in", threat:30},
+      {name:"Cledara", gap:"Focused on payments, not usage analytics", threat:45},
+      {name:"Spreadsheet", gap:"Manual, no automation", threat:0}
+    ],
+    mvp:["Plaid bank feed integration to detect SaaS charges","Auto-categorize subscriptions by tool name","Slack/Google Workspace integration for last-login data","Monthly report email with 'unused tool' flag"],
+    stack:["Plaid API","Google Workspace API","Slack API","Node.js","React"],
+    moat:"First tool targeting startups under 50 people. Benchmark: 'You're spending X% more on SaaS than similar companies.'",
+    badges:[{t:"Highest price point",c:"badge-r"},{t:"B2B, strong ROI pitch",c:"badge-b"}]
+  },
+  {
+    icon:"✅", name:"Client Approval + Payment", tagline:"Proofing, contract signing, and invoice — one link",
+    accent:"#0F6E56", pain:82, revenue:86, effort:60, mrr:"$6–14K", time:"6–8 weeks", pricing:"$29–89/mo",
+    market:"Freelance designers, video editors, photographers — 12M+ in US", fast:false, highrev:true, nocmp:false, b2b:false,
+    quote:"My client approved work verbally then disputed the invoice. I now use 3 different tools just to close one project.",
+    source:"r/graphic_design + r/freelance",
+    problem:"Creative freelancers use Dropbox for proofing, DocuSign for contracts, and Stripe for payments — three logins, three tools, three places for things to go wrong.",
+    solution:"One shareable link per project. Client sees the deliverable, leaves comments, approves or requests changes, signs the contract, and pays the invoice — all in one seamless flow.",
+    competitors:[
+      {name:"HoneyBook", gap:"Full CRM, expensive, complex onboarding", threat:60},
+      {name:"Bonsai", gap:"No built-in proofing/feedback tools", threat:55},
+      {name:"Pastel / Markup.io", gap:"Proofing only, no contract or payment", threat:35}
+    ],
+    mvp:["File upload + comment layer for images/PDFs","E-sign field on a simple contract template","Stripe payment request linked on approval","Email notifications on each action"],
+    stack:["Stripe","PDF e-sign","React","Canvas API","Resend"],
+    moat:"The only tool combining all three steps. Target video editors and photographers specifically.",
+    badges:[{t:"Best for designers/editors",c:"badge-y"},{t:"Strong retention",c:"badge-g"}]
+  },
+  {
+    icon:"🤖", name:"Meeting → Task AI Agent", tagline:"Transcripts in, assigned tasks out, synced to PM tools",
+    accent:"#993C1D", pain:76, revenue:84, effort:48, mrr:"$7–15K", time:"4–6 weeks", pricing:"$29–99/mo",
+    market:"55M meetings/day in the US; every company with meetings", fast:true, highrev:true, nocmp:false, b2b:true,
+    quote:"We pay for Otter AND Notion AND Linear and still spend 20 min after every meeting creating tasks manually.",
+    source:"r/productivity + r/startups",
+    problem:"Meeting transcription tools produce walls of text. Action items get buried. Someone still has to read the transcript and manually create tasks in Linear, Asana, or Jira. This always falls through.",
+    solution:"Paste or auto-import a transcript → AI extracts action items with assignee, due date, and priority → pushes tasks directly to your connected PM tool. Review screen before sync.",
+    competitors:[
+      {name:"Otter.ai", gap:"Transcription only, no PM tool integration or task creation", threat:40},
+      {name:"Fireflies.ai", gap:"Has basic action items but no PM sync or editing", threat:55},
+      {name:"Notion AI", gap:"Within Notion only, no Linear/Asana/Jira push", threat:35}
+    ],
+    mvp:["Upload transcript (txt/pdf) or paste text","GPT-4 extraction: action item, owner name, due date","Review + edit screen before syncing","Linear API integration first, then Asana"],
+    stack:["OpenAI API","Linear API","Asana API","Node.js","React"],
+    moat:"Multi-PM integration breadth. Over time: auto-import from Otter/Fireflies via webhook.",
+    badges:[{t:"AI-native, fast to build",c:"badge-b"},{t:"Viral in teams",c:"badge-g"}]
+  }
+];
+
+// State
+const notes = {};
+const votes = {};
+
+function getThreatColor(t) {
+  if (t >= 60) return '#ff8f8f';
+  if (t >= 40) return '#ffc97a';
+  return '#5de08a';
+}
+
+function renderGrid(filter) {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  const filtered = ideas.filter(d => {
+    if (filter === 'all') return true;
+    if (filter === 'fast') return d.fast;
+    if (filter === 'highrev') return d.highrev;
+    if (filter === 'nocmp') return d.nocmp;
+    if (filter === 'b2b') return d.b2b;
+    return true;
+  });
+  filtered.forEach((d, i) => {
+    const voteIcon = votes[d.name] === 'yes' ? '👍' : votes[d.name] === 'no' ? '👎' : votes[d.name] === 'maybe' ? '🤔' : '';
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="card-top">
+        <div class="card-icon-row">
+          <div class="card-icon">${d.icon}</div>
+          <span class="card-rank">${voteIcon || ('#0' + (i+1))}</span>
+        </div>
+        <div class="card-title">${d.name}</div>
+        <div class="card-tagline">${d.tagline}</div>
+      </div>
+      <div class="card-body">
+        <div class="meter-row"><span class="meter-lbl">Pain</span><div class="meter"><div class="meter-fill" style="width:${d.pain}%;background:${d.accent};"></div></div><span class="meter-val">${d.pain}</span></div>
+        <div class="meter-row"><span class="meter-lbl">Revenue</span><div class="meter"><div class="meter-fill" style="width:${d.revenue}%;background:${d.accent};"></div></div><span class="meter-val">${d.revenue}</span></div>
+        <div class="meter-row"><span class="meter-lbl">Buildable</span><div class="meter"><div class="meter-fill" style="width:${100-d.effort}%;background:${d.accent};"></div></div><span class="meter-val">${100-d.effort}</span></div>
+        <div class="tags">${d.stack.slice(0,4).map(t => `<span class="tag">${t}</span>`).join('')}</div>
+      </div>
+      <div class="card-footer">
+        <div><div class="footer-mrr">${d.mrr} MRR</div><div class="footer-time">${d.time} to MVP</div></div>
+        <div style="font-size:11px;color:var(--text3);">${d.pricing}</div>
+      </div>`;
+    card.onclick = () => openDrawer(d);
+    grid.appendChild(card);
+  });
+}
+
+function openDrawer(d) {
+  const content = document.getElementById('drawer-content');
+  const savedNote = notes[d.name] || '';
+  const vote = votes[d.name] || '';
+  content.innerHTML = `
+    <div class="drawer-icon">${d.icon}</div>
+    <div class="drawer-title">${d.name}</div>
+    <div class="drawer-sub">${d.tagline}</div>
+    <div class="badge-row">${d.badges.map(b => `<span class="badge ${b.c}">${b.t}</span>`).join('')}</div>
+
+    <div class="metrics-grid">
+      <div class="metric"><div class="metric-val">${d.mrr}</div><div class="metric-lbl">Target MRR</div></div>
+      <div class="metric"><div class="metric-val">${d.time}</div><div class="metric-lbl">MVP time</div></div>
+      <div class="metric"><div class="metric-val">${d.pricing}</div><div class="metric-lbl">Pricing</div></div>
+    </div>
+
+    <div class="quote-block">
+      <div class="quote-text">"${d.quote}"</div>
+      <div class="quote-src">— ${d.source}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">The problem</div>
+      <div class="section-body">${d.problem}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">The solution</div>
+      <div class="section-body">${d.solution}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Competitors & gaps</div>
+      <ul class="comp-list">
+        ${d.competitors.map(c => `
+          <li class="comp-item">
+            <div style="flex:1;">
+              <div class="comp-name">${c.name}</div>
+              <div class="comp-gap">${c.gap}</div>
+            </div>
+            <div class="comp-threat">
+              <div class="threat-val" style="color:${getThreatColor(c.threat)};">${c.threat}%</div>
+              <div class="threat-lbl">threat</div>
+            </div>
+          </li>`).join('')}
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-title">MVP feature list</div>
+      <ul class="mvp-list">
+        ${d.mvp.map((m,i) => `<li class="mvp-item"><div class="mvp-num">${i+1}</div><div class="mvp-text">${m}</div></li>`).join('')}
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Tech stack</div>
+      <div class="stack-row">${d.stack.map(t => `<span class="stack-tag">${t}</span>`).join('')}</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Defensible moat</div>
+      <div class="moat-box"><div class="moat-text">${d.moat}</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Market size</div>
+      <div class="section-body">${d.market}</div>
+    </div>
+
+    <div class="section notes-area">
+      <div class="notes-label">Team discussion notes</div>
+      <textarea class="notes-input" id="note-input" placeholder="Add your team's thoughts, concerns, or next steps...">${savedNote}</textarea>
+      <button class="save-note-btn" onclick="saveNote('${d.name}')">Save note</button>
+    </div>
+
+    <div class="section">
+      <div class="notes-label">Team vote on this idea</div>
+      <div class="vote-row">
+        <button class="vote-btn ${vote==='yes'?'vote-yes':''}" onclick="castVote('${d.name}','yes')">👍 Build it</button>
+        <button class="vote-btn ${vote==='maybe'?'vote-maybe':''}" onclick="castVote('${d.name}','maybe')">🤔 Explore more</button>
+        <button class="vote-btn ${vote==='no'?'vote-no':''}" onclick="castVote('${d.name}','no')">👎 Skip</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+
+function closeDrawer() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+}
+
+function saveNote(name) {
+  const val = document.getElementById('note-input').value;
+  notes[name] = val;
+  const btn = document.querySelector('.save-note-btn');
+  btn.textContent = '✓ Saved';
+  setTimeout(() => { btn.textContent = 'Save note'; }, 1500);
+}
+
+function castVote(name, v) {
+  votes[name] = v;
+  renderGrid(currentFilter);
+  openDrawer(ideas.find(d => d.name === name));
+}
+
+function filterCards(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid(f);
+}
+
+let currentFilter = 'all';
+
+function renderCompareTable() {
+  const table = document.getElementById('compare-table');
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>Idea</th>
+        <th>Pain signal</th>
+        <th>Revenue signal</th>
+        <th>Buildability</th>
+        <th>MVP time</th>
+        <th>Target MRR</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${ideas.sort((a,b) => b.pain - a.pain).map(d => `
+        <tr onclick="openDrawer(ideas.find(x=>x.name==='${d.name}'))" style="cursor:pointer;">
+          <td>${d.icon} ${d.name}</td>
+          <td><div class="score-bar"><div class="score-fill" style="width:${d.pain*0.7}px;background:${d.accent};"></div><span style="font-size:12px;margin-left:6px;">${d.pain}</span></div></td>
+          <td><div class="score-bar"><div class="score-fill" style="width:${d.revenue*0.7}px;background:${d.accent};"></div><span style="font-size:12px;margin-left:6px;">${d.revenue}</span></div></td>
+          <td><div class="score-bar"><div class="score-fill" style="width:${(100-d.effort)*0.7}px;background:${d.accent};"></div><span style="font-size:12px;margin-left:6px;">${100-d.effort}</span></div></td>
+          <td style="white-space:nowrap;">${d.time}</td>
+          <td style="color:#1a1a18;font-weight:600;">${d.mrr}</td>
+        </tr>`).join('')}
+    </tbody>`;
+}
+
+renderGrid('all');
+renderCompareTable();
+</script>
+</body>
+</html>
